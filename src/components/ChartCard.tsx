@@ -2,11 +2,12 @@ import { useMemo } from 'react';
 import ReactECharts from 'echarts-for-react';
 import styles from './ChartCard.module.css';
 import { ChartDataPoint } from '../types';
+import { InputOutputTrendData, HourlyData } from '../utils/csvParser';
 
 interface ChartCardProps {
   title: string;
-  data: ChartDataPoint[];
-  type: 'line' | 'bar' | 'pie';
+  data: ChartDataPoint[] | InputOutputTrendData[] | HourlyData[];
+  type: 'line' | 'bar' | 'pie' | 'inputOutput' | 'hourly';
   options?: {
    GranularitySelect?: boolean;
     granularity?: 'hour' | 'day';
@@ -20,6 +21,7 @@ const CHART_COLORS = ['#ec4899', '#8b5cf6', '#06b6d4', '#10b981', '#f59e0b', '#e
 export function ChartCard({ title, data, type, options }: ChartCardProps) {
   const chartOption = useMemo(() => {
     if (type === 'pie') {
+      const chartData = data as ChartDataPoint[];
       return {
         tooltip: {
           trigger: 'item',
@@ -59,7 +61,7 @@ export function ChartCard({ title, data, type, options }: ChartCardProps) {
                 color: '#fafafa',
               },
             },
-            data: data.map((item, index) => ({
+            data: chartData.map((item, index) => ({
               value: item.value,
               name: item.name,
               itemStyle: { color: CHART_COLORS[index % CHART_COLORS.length] },
@@ -69,7 +71,155 @@ export function ChartCard({ title, data, type, options }: ChartCardProps) {
       };
     }
 
-    // Line or Bar chart
+    if (type === 'inputOutput') {
+      const chartData = data as InputOutputTrendData[];
+      return {
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: '#232328',
+          borderColor: 'rgba(255,255,255,0.1)',
+          textStyle: { color: '#fafafa' },
+          axisPointer: {
+            type: 'cross',
+            crossStyle: { color: '#8b8b8d' },
+          },
+        },
+        legend: {
+          data: ['Input', 'Output'],
+          textStyle: { color: '#8b8b8d', fontSize: 12 },
+          top: 0,
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '15%',
+          top: '15%',
+          containLabel: true,
+        },
+        xAxis: {
+          type: 'category',
+          data: chartData.map(item => item.date),
+          axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+          axisLabel: {
+            color: '#8b8b8d',
+            fontSize: 11,
+          },
+          axisTick: { show: false },
+        },
+        yAxis: {
+          type: 'value',
+          axisLine: { show: false },
+          axisLabel: {
+            color: '#8b8b8d',
+            fontSize: 11,
+            formatter: (value: number) => {
+              if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+              if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+              return value.toString();
+            },
+          },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } },
+        },
+        series: [
+          {
+            name: 'Output',
+            data: chartData.map(item => item.outputTokens),
+            type: 'bar',
+            stack: 'total',
+            itemStyle: { color: '#ec4899' },
+            barMaxWidth: 24,
+          },
+          {
+            name: 'Input',
+            data: chartData.map(item => item.inputTokens),
+            type: 'bar',
+            stack: 'total',
+            itemStyle: { color: '#8b5cf6' },
+            barMaxWidth: 24,
+          },
+        ],
+      };
+    }
+
+    if (type === 'hourly') {
+      const chartData = data as HourlyData[];
+      return {
+        tooltip: {
+          trigger: 'axis',
+          backgroundColor: '#232328',
+          borderColor: 'rgba(255,255,255,0.1)',
+          textStyle: { color: '#fafafa' },
+          axisPointer: {
+            type: 'cross',
+            crossStyle: { color: '#8b8b8d' },
+          },
+        },
+        grid: {
+          left: '3%',
+          right: '4%',
+          bottom: '15%',
+          top: '10%',
+          containLabel: true,
+        },
+        xAxis: {
+          type: 'category',
+          data: chartData.map(item => `${item.hour}:00`),
+          axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
+          axisLabel: {
+            color: '#8b8b8d',
+            fontSize: 10,
+            interval: 2,
+          },
+          axisTick: { show: false },
+        },
+        yAxis: {
+          type: 'value',
+          axisLine: { show: false },
+          axisLabel: {
+            color: '#8b8b8d',
+            fontSize: 11,
+            formatter: (value: number) => {
+              if (value >= 1000000) return `${(value / 1000000).toFixed(1)}M`;
+              if (value >= 1000) return `${(value / 1000).toFixed(1)}K`;
+              return value.toString();
+            },
+          },
+          splitLine: { lineStyle: { color: 'rgba(255,255,255,0.05)' } },
+        },
+        series: [
+          {
+            data: chartData.map(item => item.tokens),
+            type: 'bar',
+            smooth: true,
+            symbol: 'circle',
+            symbolSize: 4,
+            lineStyle: {
+              color: '#06b6d4',
+              width: 2,
+            },
+            itemStyle: {
+              color: '#06b6d4',
+            },
+            areaStyle: {
+              color: {
+                type: 'linear',
+                x: 0,
+                y: 0,
+                x2: 0,
+                y2: 1,
+                colorStops: [
+                  { offset: 0, color: 'rgba(6, 182, 212, 0.3)' },
+                  { offset: 1, color: 'rgba(6, 182, 212, 0)' },
+                ],
+              },
+            },
+          },
+        ],
+      };
+    }
+
+    // Line or Bar chart (default)
+    const chartData = data as ChartDataPoint[];
     return {
       tooltip: {
         trigger: 'axis',
@@ -90,7 +240,7 @@ export function ChartCard({ title, data, type, options }: ChartCardProps) {
       },
       xAxis: {
         type: 'category',
-        data: data.map(item => item.name),
+        data: chartData.map(item => item.name),
         axisLine: { lineStyle: { color: 'rgba(255,255,255,0.1)' } },
         axisLabel: {
           color: '#8b8b8d',
@@ -115,7 +265,7 @@ export function ChartCard({ title, data, type, options }: ChartCardProps) {
       },
       series: [
         {
-          data: data.map(item => item.value),
+          data: chartData.map(item => item.value),
           type: type === 'bar' ? 'bar' : 'line',
           smooth: true,
           symbol: 'circle',

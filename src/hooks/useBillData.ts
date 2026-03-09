@@ -1,5 +1,5 @@
 import { useCallback, useState, useMemo } from 'react';
-import { parseCSV, aggregateByApi, aggregateByModel, getTrendData } from '../utils/csvParser';
+import { parseCSV, aggregateByApi, aggregateByModel, getTrendData, getInputOutputTrendData, getHourlyDistribution } from '../utils/csvParser';
 import { useBillStore } from '../store/billStore';
 import { ChartDataPoint } from '../types';
 
@@ -81,6 +81,16 @@ export function useBillData() {
   // 获取模型分布数据
   const modelDistribution: ChartDataPoint[] = aggregateByModel(rangeFilteredRecords);
 
+  // 输入/输出 Token 趋势数据
+  const inputOutputTrendData = useMemo(() => {
+    return getInputOutputTrendData(rangeFilteredRecords);
+  }, [rangeFilteredRecords]);
+
+  // 24小时分布数据
+  const hourlyDistribution = useMemo(() => {
+    return getHourlyDistribution(rangeFilteredRecords);
+  }, [rangeFilteredRecords]);
+
   // 计算基于区间的统计摘要
   const rangeSummary = useMemo(() => {
     if (!rangeFilteredRecords || rangeFilteredRecords.length === 0) {
@@ -113,6 +123,7 @@ export function useBillData() {
       models: [...new Set(rangeFilteredRecords.map(r => r.model))],
       apiKeys: [...new Set(rangeFilteredRecords.map(r => r.apiKeyName))],
       apiNames: [...new Set(rangeFilteredRecords.map(r => r.apiName))],
+      avgCostPerCall: rangeFilteredRecords.length > 0 ? totalAmount / rangeFilteredRecords.length : 0,
     };
   }, [rangeFilteredRecords, summary]);
 
@@ -139,6 +150,8 @@ export function useBillData() {
     trendData,
     apiDistribution,
     modelDistribution,
+    inputOutputTrendData,
+    hourlyDistribution,
 
     // 区间选择器数据
     timelineData,

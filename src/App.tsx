@@ -14,6 +14,8 @@ function App() {
     trendData,
     apiDistribution,
     modelDistribution,
+    inputOutputTrendData,
+    hourlyDistribution,
     handleFileUpload,
     setSelectedModel,
     setSelectedApi,
@@ -114,6 +116,12 @@ function App() {
                 value={`${rangeSummary && rangeSummary.totalCalls > 0 ? ((rangeSummary.successCalls / rangeSummary.totalCalls) * 100).toFixed(1) : 0}%`}
                 subValue={`成功: ${rangeSummary?.successCalls ?? 0} | 失败: ${rangeSummary?.failedCalls ?? 0}`}
               />
+              <StatsCard
+                icon={Icons.money}
+                label="单次调用成本"
+                value={formatCurrency(rangeSummary?.avgCostPerCall ?? 0)}
+                subValue="平均每次 API 调用费用"
+              />
             </section>
 
             {/* 区间切换器 */}
@@ -156,6 +164,16 @@ function App() {
                 title="模型分布"
                 data={modelDistribution}
                 type="bar"
+              />
+              <ChartCard
+                title="Input vs Output Token"
+                data={inputOutputTrendData}
+                type="inputOutput"
+              />
+              <ChartCard
+                title="24小时调用分布"
+                data={hourlyDistribution}
+                type="hourly"
               />
               <ChartCard
                 title="消费趋势 (金额)"

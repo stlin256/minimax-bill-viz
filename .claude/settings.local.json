@@ -6,7 +6,13 @@
       "Bash(npm run build)",
       "Bash(npm run dev)",
       "Bash(git add .)",
-      "Bash(git commit -m \"Add GitHub千star style README\")"
+      "Bash(git commit -m \"Add GitHub千star style README\")",
+      "Bash(git remote add origin https://github.com/stlin256/minimax-bill-viz.git)",
+      "Bash(git push -u origin master)",
+      "Bash(git push -u origin main)",
+      "Bash(git push -u origin master:main)",
+      "Bash(git push -f origin master:main)",
+      "Bash(git commit -m \"Add Input/Output and hourly charts, fix GitHub Actions\")"
     ]
   }
 }

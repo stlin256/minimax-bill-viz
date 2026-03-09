@@ -55,6 +55,8 @@ export interface ParsedData {
     apiKeys: string[];
     /** 接口列表 */
     apiNames: string[];
+    /** 平均每次调用成本 */
+    avgCostPerCall: number;
   };
 }
 
@@ -238,6 +240,7 @@ function calculateSummary(records: BillRecord[]): ParsedData['summary'] {
       models: [],
       apiKeys: [],
       apiNames: [],
+      avgCostPerCall: 0,
     };
   }
 
@@ -274,6 +277,7 @@ function calculateSummary(records: BillRecord[]): ParsedData['summary'] {
     models,
     apiKeys,
     apiNames,
+    avgCostPerCall: records.length > 0 ? totalAmount / records.length : 0,
   };
 }
 
@@ -387,5 +391,76 @@ export function getTrendData(
   return sortedDays.map(day => ({
     name: day,
     value: map.get(day) || 0,
+  }));
+}
+
+/** 输入/输出 Token 趋势数据 (用于堆叠柱状图) */
+export interface InputOutputTrendData {
+  date: string;
+  inputTokens: number;
+  outputTokens: number;
+}
+
+export function getInputOutputTrendData(records: BillRecord[]): InputOutputTrendData[] {
+  const map = new Map<string, { input: number; output: number }>();
+
+  for (const record of records) {
+    const date = parseTimestamp(record.timestamp);
+    if (!date) continue;
+
+    const dayKey = formatDate(date);
+    const current = map.get(dayKey) || { input: 0, output: 0 };
+    map.set(dayKey, {
+      input: current.input + record.inputTokens,
+      output: current.output + record.outputTokens,
+    });
+  }
+
+  // 按日期排序
+  const sortedDays = Array.from(map.keys()).sort();
+
+  return sortedDays.map(day => {
+    const data = map.get(day)!;
+    return {
+      date: day,
+      inputTokens: data.input,
+      outputTokens: data.output,
+    };
+  });
+}
+
+/** 24小时分布数据 */
+export interface HourlyData {
+  hour: number;
+  tokens: number;
+  amount: number;
+  count: number;
+}
+
+export function getHourlyDistribution(records: BillRecord[]): HourlyData[] {
+  const hourlyMap = new Map<number, { tokens: number; amount: number; count: number }>();
+
+  // 初始化 24 小时
+  for (let i = 0; i < 24; i++) {
+    hourlyMap.set(i, { tokens: 0, amount: 0, count: 0 });
+  }
+
+  for (const record of records) {
+    // 提取小时: "2026-03-08 23:00-24:00" -> 23
+    const match = record.timestamp.match(/(\d{2}):\d{2}/);
+    if (!match) continue;
+
+    const hour = parseInt(match[1], 10);
+    const current = hourlyMap.get(hour)!;
+    hourlyMap.set(hour, {
+      tokens: current.tokens + record.totalTokens,
+      amount: current.amount + record.amount,
+      count: current.count + 1,
+    });
+  }
+
+  return Array.from(hourlyMap.entries()).map(([hour, data]) => ({
+    hour,
+    ...data,
   }));
 }

@@ -55,6 +55,8 @@ export interface ParsedData {
     apiKeys: string[];
     /** 接口列表 */
     apiNames: string[];
+    /** 平均每次调用成本 */
+    avgCostPerCall: number;
   };
 }
 
