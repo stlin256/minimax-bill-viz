@@ -83,8 +83,8 @@ export function useBillData() {
 
   // 输入/输出 Token 趋势数据
   const inputOutputTrendData = useMemo(() => {
-    return getInputOutputTrendData(rangeFilteredRecords);
-  }, [rangeFilteredRecords]);
+    return getInputOutputTrendData(rangeFilteredRecords, granularity);
+  }, [rangeFilteredRecords, granularity]);
 
   // 24小时分布数据
   const hourlyDistribution = useMemo(() => {

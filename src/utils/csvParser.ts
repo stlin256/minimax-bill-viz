@@ -401,7 +401,35 @@ export interface InputOutputTrendData {
   outputTokens: number;
 }
 
-export function getInputOutputTrendData(records: BillRecord[]): InputOutputTrendData[] {
+export function getInputOutputTrendData(records: BillRecord[], groupBy: 'hour' | 'day' = 'day'): InputOutputTrendData[] {
+  if (groupBy === 'hour') {
+    // 按小时聚合
+    const hourlyMap = new Map<number, { input: number; output: number }>();
+
+    for (let i = 0; i < 24; i++) {
+      hourlyMap.set(i, { input: 0, output: 0 });
+    }
+
+    for (const record of records) {
+      const match = record.timestamp.match(/(\d{2}):\d{2}/);
+      if (!match) continue;
+
+      const hour = parseInt(match[1], 10);
+      const current = hourlyMap.get(hour)!;
+      hourlyMap.set(hour, {
+        input: current.input + record.inputTokens,
+        output: current.output + record.outputTokens,
+      });
+    }
+
+    return Array.from(hourlyMap.entries()).map(([hour, data]) => ({
+      date: `${String(hour).padStart(2, '0')}:00`,
+      inputTokens: data.input,
+      outputTokens: data.output,
+    }));
+  }
+
+  // 按天聚合
   const map = new Map<string, { input: number; output: number }>();
 
   for (const record of records) {
