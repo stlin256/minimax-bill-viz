@@ -23,6 +23,14 @@ export function RangeSelector({ data, onRangeChange }: RangeSelectorProps) {
     dragStartRange.current = { ...range };
   }, [range]);
 
+  // 双击选择某一天
+  const handleBarDoubleClick = useCallback((index: number) => {
+    const newRange = { start: index, end: index };
+    setRange(newRange);
+    setDisplayRange(newRange);
+    onRangeChange(index, index);
+  }, [onRangeChange]);
+
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
 
@@ -33,9 +41,9 @@ export function RangeSelector({ data, onRangeChange }: RangeSelectorProps) {
     setRange(prev => {
       let newRange = { ...prev };
       if (isDragging === 'start') {
-        newRange.start = Math.min(Math.round(percentage * (data.length - 1)), prev.end - 1);
+        newRange.start = Math.min(Math.round(percentage * (data.length - 1)), prev.end);
       } else if (isDragging === 'end') {
-        newRange.end = Math.max(Math.round(percentage * (data.length - 1)), prev.start + 1);
+        newRange.end = Math.max(Math.round(percentage * (data.length - 1)), prev.start);
       } else if (isDragging === 'both') {
         const diff = dragStartRange.current.end - dragStartRange.current.start;
         const startPercentage = percentage - (diff / (data.length - 1)) / 2;
@@ -88,13 +96,17 @@ export function RangeSelector({ data, onRangeChange }: RangeSelectorProps) {
   };
 
   const dayCount = displayRange.end - displayRange.start + 1;
+  const isSingleDay = displayRange.start === displayRange.end;
 
   return (
     <div className={styles.container}>
       <div className={styles.header}>
         <span className={styles.label}>时间区间筛选</span>
         <span className={styles.dateRange}>
-          {formatDate(data[displayRange.start]?.date || '')} - {formatDate(data[displayRange.end]?.date || '')}
+          {isSingleDay
+            ? formatDate(data[displayRange.start]?.date || '')
+            : `${formatDate(data[displayRange.start]?.date || '')} - ${formatDate(data[displayRange.end]?.date || '')}`
+          }
           <span className={styles.dayCount}>（{dayCount} 天）</span>
         </span>
       </div>
@@ -108,6 +120,7 @@ export function RangeSelector({ data, onRangeChange }: RangeSelectorProps) {
                 key={i}
                 className={`${styles.bar} ${i >= displayRange.start && i <= displayRange.end ? styles.barActive : ''}`}
                 style={{ height: `${(item.value / maxValue) * 100}%` }}
+                onDoubleClick={() => handleBarDoubleClick(i)}
               />
             ))}
           </div>
