@@ -31,6 +31,17 @@ export function RangeSelector({ data, onRangeChange }: RangeSelectorProps) {
     onRangeChange(index, index);
   }, [onRangeChange]);
 
+  // 双击整个时间轴区域时，计算点击的是哪个柱子
+  const handleTimelineDoubleClick = useCallback((e: React.MouseEvent) => {
+    if (!containerRef.current) return;
+    const rect = containerRef.current.getBoundingClientRect();
+    const x = e.clientX - rect.left;
+    const percentage = x / rect.width;
+    const index = Math.round(percentage * (data.length - 1));
+    const clampedIndex = Math.max(0, Math.min(data.length - 1, index));
+    handleBarDoubleClick(clampedIndex);
+  }, [data.length, handleBarDoubleClick]);
+
   const handleMouseMove = useCallback((e: MouseEvent) => {
     if (!isDragging || !containerRef.current) return;
 
@@ -83,8 +94,22 @@ export function RangeSelector({ data, onRangeChange }: RangeSelectorProps) {
 
   if (data.length === 0) return null;
 
-  const leftPercent = (displayRange.start / (data.length - 1)) * 100;
-  const rightPercent = (displayRange.end / (data.length - 1)) * 100;
+  const dayCount = displayRange.end - displayRange.start + 1;
+  const isSingleDay = displayRange.start === displayRange.end;
+
+  // 计算单天时把手的偏移量（一个柱子宽度）
+  const barWidthPercent = 100 / (data.length - 1);
+
+  // 左侧把手位置：单天时在最左边柱子左边，多天时在起始柱子左边
+  const leftPercent = isSingleDay
+    ? (displayRange.start / (data.length - 1)) * 100 - barWidthPercent / 2
+    : (displayRange.start / (data.length - 1)) * 100;
+
+  // 右侧把手位置：单天时在最右边柱子右边，多天时在结束柱子右边
+  const rightPercent = isSingleDay
+    ? (displayRange.end / (data.length - 1)) * 100 + barWidthPercent / 2
+    : (displayRange.end / (data.length - 1)) * 100;
+
   const rangeWidth = rightPercent - leftPercent;
 
   const formatDate = (dateStr: string) => {
@@ -94,9 +119,6 @@ export function RangeSelector({ data, onRangeChange }: RangeSelectorProps) {
     }
     return dateStr;
   };
-
-  const dayCount = displayRange.end - displayRange.start + 1;
-  const isSingleDay = displayRange.start === displayRange.end;
 
   return (
     <div className={styles.container}>
@@ -112,7 +134,7 @@ export function RangeSelector({ data, onRangeChange }: RangeSelectorProps) {
       </div>
 
       <div className={styles.timelineWrapper}>
-        <div className={styles.timeline} ref={containerRef}>
+        <div className={styles.timeline} ref={containerRef} onDoubleClick={handleTimelineDoubleClick}>
           {/* 背景柱状图 */}
           <div className={styles.bars}>
             {data.map((item, i) => (
@@ -120,7 +142,6 @@ export function RangeSelector({ data, onRangeChange }: RangeSelectorProps) {
                 key={i}
                 className={`${styles.bar} ${i >= displayRange.start && i <= displayRange.end ? styles.barActive : ''}`}
                 style={{ height: `${(item.value / maxValue) * 100}%` }}
-                onDoubleClick={() => handleBarDoubleClick(i)}
               />
             ))}
           </div>

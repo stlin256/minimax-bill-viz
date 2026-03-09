@@ -16,7 +16,8 @@
       "Bash(git push origin main)",
       "Bash(git push origin master:main)",
       "Bash(git commit -m \"Fix stacked bar order: Input at bottom, Output on top\")",
-      "Bash(git commit -m \"Fix range selector: allow 1 day, add double-click to select single day\")"
+      "Bash(git commit -m \"Fix range selector: allow 1 day, add double-click to select single day\")",
+      "Bash(git commit -m \"Fix range selector: double-click anywhere, handle positions for single day\")"
     ]
   }
 }
