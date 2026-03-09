@@ -223,6 +223,16 @@
   color: #5c5c5e;
 }
 
+.formatLink {
+  color: var(--accent-primary);
+  text-decoration: none;
+  transition: all 0.2s ease;
+}
+
+.formatLink:hover {
+  text-decoration: underline;
+}
+
 /* 边框光效 */
 .borderGlow {
   position: absolute;

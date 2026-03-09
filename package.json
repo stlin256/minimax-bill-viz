@@ -1,9 +1,9 @@
 {
-  "name": "minimax-bill",
+  "name": "minimax-bill-viz",
   "private": true,
   "version": "1.0.0",
   "type": "module",
-  "homepage": "https://your-username.github.io/minimax-bill/",
+  "homepage": "https://stlin256.github.io/minimax-bill-viz/",
   "scripts": {
     "dev": "vite",
     "build": "tsc && vite build",

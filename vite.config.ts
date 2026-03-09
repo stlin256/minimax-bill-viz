@@ -3,7 +3,7 @@ import react from '@vitejs/plugin-react'
 
 export default defineConfig({
   plugins: [react()],
-  base: '/minimax-bill/',
+  base: '/minimax-bill-viz/',
   build: {
     outDir: 'dist',
     sourcemap: false,

@@ -147,7 +147,14 @@ export function DropZone({ onFileSelect, isLoading }: DropZoneProps) {
 
         <div className={styles.formats}>
           <span className={styles.formatBadge}>CSV</span>
-          <span className={styles.formatText}>支持 MiniMax 账单导出格式</span>
+          <span className={styles.formatText}>
+            支持 <a
+              href="https://platform.minimaxi.com/user-center/payment/billing-history"
+              target="_blank"
+              rel="noopener noreferrer"
+              className={styles.formatLink}
+            >MiniMax 账单导出格式</a>
+          </span>
         </div>
       </div>
 
