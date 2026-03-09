@@ -122,19 +122,19 @@ export function ChartCard({ title, data, type, options }: ChartCardProps) {
         },
         series: [
           {
-            name: 'Output',
-            data: chartData.map(item => item.outputTokens),
-            type: 'bar',
-            stack: 'total',
-            itemStyle: { color: '#ec4899' },
-            barMaxWidth: 24,
-          },
-          {
             name: 'Input',
             data: chartData.map(item => item.inputTokens),
             type: 'bar',
             stack: 'total',
             itemStyle: { color: '#8b5cf6' },
+            barMaxWidth: 24,
+          },
+          {
+            name: 'Output',
+            data: chartData.map(item => item.outputTokens),
+            type: 'bar',
+            stack: 'total',
+            itemStyle: { color: '#ec4899' },
             barMaxWidth: 24,
           },
         ],

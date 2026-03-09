@@ -12,7 +12,10 @@
       "Bash(git push -u origin main)",
       "Bash(git push -u origin master:main)",
       "Bash(git push -f origin master:main)",
-      "Bash(git commit -m \"Add Input/Output and hourly charts, fix GitHub Actions\")"
+      "Bash(git commit -m \"Add Input/Output and hourly charts, fix GitHub Actions\")",
+      "Bash(git push origin main)",
+      "Bash(git push origin master:main)",
+      "Bash(git commit -m \"Fix stacked bar order: Input at bottom, Output on top\")"
     ]
   }
 }
